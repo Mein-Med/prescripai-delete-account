@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Delete Your Account - Prescrip.Ai</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: #f9f9f9;
+      color: #333;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+    .container {
+      max-width: 500px;
+      background: #fff;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      text-align: center;
+    }
+    h1 {
+      color: #d9534f;
+    }
+    p {
+      margin: 15px 0;
+      line-height: 1.6;
+    }
+    form {
+      margin-top: 20px;
+    }
+    input[type="email"],
+    input[type="password"] {
+      width: 100%;
+      padding: 10px;
+      margin: 10px 0;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+    }
+    button {
+      padding: 10px 20px;
+      background-color: #d9534f;
+      color: #fff;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 16px;
+    }
+    button:hover {
+      background-color: #c9302c;
+    }
+    .success-message {
+      color: green;
+      margin-top: 20px;
+    }
+    .error-message {
+      color: red;
+      margin-top: 20px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>We're Sorry to See You Go</h1>
+    <p>
+      At <strong>Prescrip.Ai</strong>, we strive to provide the best experience for doctors and healthcare professionals. If you’ve decided to delete your account, we’re truly sorry to see you leave. Please follow the steps below to complete the process.
+    </p>
+    <form id="deleteAccountForm">
+      <input type="email" id="email" placeholder="Enter your email" required />
+      <input type="password" id="password" placeholder="Enter your password" required />
+      <button type="submit">Delete My Account</button>
+    </form>
+    <div id="responseMessage" class="success-message" style="display: none;">
+      Your account has been successfully deleted. We hope to see you again in the future.
+    </div>
+    <div id="errorMessage" class="error-message" style="display: none;">
+      An error occurred. Please check your credentials and try again.
+    </div>
+  </div>
+
+  <script>
+    document.getElementById('deleteAccountForm').addEventListener('submit', async function (event) {
+      event.preventDefault();
+
+      const email = document.getElementById('email').value;
+      const password = document.getElementById('password').value;
+      const responseMessage = document.getElementById('responseMessage');
+      const errorMessage = document.getElementById('errorMessage');
+
+      // Hide previous messages
+      responseMessage.style.display = 'none';
+      errorMessage.style.display = 'none';
+
+      try {
+        // Step 1: Authenticate the user and get the bearer token
+        const authResponse = await fetch('http://89.58.12.179:3333/auth/signin', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+          },
+          body: new URLSearchParams({
+            email: email,
+            password: password,
+          }),
+        });
+
+        if (!authResponse.ok) {
+          throw new Error('Authentication failed');
+        }
+
+        const authData = await authResponse.json();
+        const token = authData.token;
+
+        // Step 2: Use the token to delete the account
+        const deleteResponse = await fetch('http://89.58.12.179:3333/users/delete', {
+          method: 'DELETE',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+          },
+        });
+
+        if (deleteResponse.ok) {
+          responseMessage.style.display = 'block';
+        } else {
+          throw new Error('Account deletion failed');
+        }
+      } catch (error) {
+        errorMessage.style.display = 'block';
+        console.error('Error:', error);
+      }
+    });
+  </script>
+</body>
+</html>
